@@ -1,0 +1,41 @@
+{
+  "name": "bitrix24-mcp-server",
+  "version": "1.0.0",
+  "description": "A Model Context Protocol (MCP) server for integrating Bitrix24 with Claude and other LLMs",
+  "author": "Open Source Community",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/bitrix24-mcp-server.git"
+  },
+  "keywords": [
+    "mcp",
+    "model context protocol",
+    "bitrix24",
+    "claude",
+    "llm",
+    "ai",
+    "integration",
+    "crm",
+    "knowledge base"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.1",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2"
+  }
+}

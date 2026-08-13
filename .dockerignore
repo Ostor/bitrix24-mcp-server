@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+active_token.txt
+*.log
+.git
+.gitignore
+deploy.exp
+deploy.sh
+run.sh

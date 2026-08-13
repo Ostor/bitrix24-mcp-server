@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  bitrix24-mcp:
+    build: .
+    container_name: bitrix24-mcp-server
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
