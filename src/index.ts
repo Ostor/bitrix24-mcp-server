@@ -68,6 +68,23 @@ function createMcpServer(): McpServer {
     }
   );
 
+  // 1.5. Поиск сотрудников (Пользователей)
+  server.tool(
+    "bitrix24_search_users",
+    "Найти сотрудников компании (teammates/users). Возвращает список пользователей.",
+    {
+      name: z.string().optional().describe("Имя или фамилия сотрудника для поиска"),
+      email: z.string().optional().describe("Email сотрудника для поиска")
+    },
+    async ({ name, email }) => {
+      const token = getTokenOrThrow();
+      const result = await bitrix24.searchUsers(token, name, email);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    }
+  );
+
   // 2. Список сделок
   server.tool(
     "bitrix24_list_deals",

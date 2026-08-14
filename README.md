@@ -14,7 +14,7 @@ The server provides AI with the following tools:
 - **Tasks:** Read tasks, list, create, update, close, add comments.
 - **Scrum:** View epics and bind tasks to epics.
 - **Knowledge Base (2.0):** Read knowledge bases, view structure, create, edit, and retrieve pages in Markdown format.
-- **Company Structure:** Retrieve information about the current user.
+- **Company Structure:** Retrieve information about the current user, search and list company employees (teammates).
 
 ## Requirements
 

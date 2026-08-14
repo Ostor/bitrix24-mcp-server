@@ -245,6 +245,20 @@ export const bitrix24 = {
     return callBitrix24<B24User>("user.current", {}, token);
   },
 
+  searchUsers: async (token: string, name?: string, email?: string): Promise<B24User[]> => {
+    const filter: any = {};
+    if (name) {
+      filter["NAME_SEARCH"] = name; // NAME_SEARCH is often supported, or we can use "FIND"
+    }
+    if (email) {
+      filter["EMAIL"] = email;
+    }
+    return callBitrix24<B24User[]>("user.get", {
+      FILTER: filter,
+      ADMIN_MODE: true // requires 'user' scope and admin rights for full list
+    }, token);
+  },
+
   // Сделки (Deals)
   listDeals: async (token: string, filter?: any, select?: string[]): Promise<B24Deal[]> => {
     let start = 0;
