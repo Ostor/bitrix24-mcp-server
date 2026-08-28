@@ -1,0 +1,1072 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Api main",
+    "description": "Основное Api",
+    "version": "6.0"
+  },
+  "paths": {
+    "/v6/AiMessage/StreamMessage": {
+      "post": {
+        "tags": [
+          "AiMessageController_v6"
+        ],
+        "summary": "Добавление сообщения в чат, получение ответа в виде стрима",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Model_AiMessage_StreamMessage_v6"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Model_AiMessage_StreamMessage_v6"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Model_AiMessage_StreamMessage_v6"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v6/AiMessage/StreamMessage_WithImage": {
+      "post": {
+        "tags": [
+          "AiMessageController_v6"
+        ],
+        "summary": "Добавление сообщения с изображением в чат, получение ответа в виде стрима",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Model_AiMessage_StreamMessageImage_v6"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Model_AiMessage_StreamMessageImage_v6"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Model_AiMessage_StreamMessageImage_v6"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v6/AiMessage/StreamMessage_WithFile": {
+      "post": {
+        "tags": [
+          "AiMessageController_v6"
+        ],
+        "summary": "Добавление сообщения с файлом в чат, получение ответа в виде стрима",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Model_AiMessage_StreamMessageFile_v6"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Model_AiMessage_StreamMessageFile_v6"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Model_AiMessage_StreamMessageFile_v6"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v6/AiMessage/GenerateImage": {
+      "post": {
+        "tags": [
+          "AiMessageController_v6"
+        ],
+        "summary": "Генерация изображения",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Model_AiMessage_StreamMessage_v6"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Model_AiMessage_StreamMessage_v6"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Model_AiMessage_StreamMessage_v6"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Model_AiMessage_v6Result_v6"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Model_AiMessage_v6Result_v6"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Model_AiMessage_v6Result_v6"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v6"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v6"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v6"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/AiMessage/GetImage_Str": {
+      "get": {
+        "tags": [
+          "AiMessageController_v6"
+        ],
+        "summary": "Генерация изображения (Кешировано - не обращается к базе каждый раз)",
+        "parameters": [
+          {
+            "name": "ImageID",
+            "in": "query",
+            "description": "Код изображения",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v6/AiMessage/GetImage": {
+      "get": {
+        "tags": [
+          "AiMessageController_v6"
+        ],
+        "summary": "Генерация изображения (Кешировано - не обращается к базе каждый раз)",
+        "parameters": [
+          {
+            "name": "ImageID",
+            "in": "query",
+            "description": "Код изображения",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringResult_v6"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringResult_v6"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringResult_v6"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v6"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v6"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v6"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/AiMessage/GetFile": {
+      "get": {
+        "tags": [
+          "AiMessageController_v6"
+        ],
+        "summary": "Генерация изображения (Кешировано - не обращается к базе каждый раз)",
+        "parameters": [
+          {
+            "name": "FileID",
+            "in": "query",
+            "description": "Код файла",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringResult_v6"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringResult_v6"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringResult_v6"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v6"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v6"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v6"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/AiMessage/GetLast": {
+      "get": {
+        "tags": [
+          "AiMessageController_v6"
+        ],
+        "summary": "Возвращает список последних сообщений",
+        "parameters": [
+          {
+            "name": "TopicID",
+            "in": "query",
+            "description": "Идентификатор темы",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "MaxID",
+            "in": "query",
+            "description": "Максимальный известный идентификатор сообщения",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Model_AiMessage_v6ListResult_v6"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Если данные авторизации неправильные",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Model_AiMessage_v6ListResult_v1"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "У клиента нет подписки с AI или все устройства по подписке заняты",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Model_AiMessage_v6ListResult_v6"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/AiMessage/GetPrevious": {
+      "get": {
+        "tags": [
+          "AiMessageController_v6"
+        ],
+        "summary": "Возвращает список предыдущих сообщений",
+        "parameters": [
+          {
+            "name": "TopicID",
+            "in": "query",
+            "description": "Идентификатор темы",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "MinID",
+            "in": "query",
+            "description": "Минимальный известный идентификатор сообщения",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatMessageListResult_v1"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Если данные авторизации неправильные",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatMessageListResult_v1"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "У клиента нет подписки с AI или все устройства по подписке заняты",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatMessageListResult_v6"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/AiMessage/DeleteMessage": {
+      "post": {
+        "tags": [
+          "AiMessageController_v6"
+        ],
+        "summary": "Удаляет сообщение",
+        "requestBody": {
+          "description": "Данные для удаления",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Model_Common_Int_v6"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Возвращает идентификатор сообщения клиента",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v5"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Если данные авторизации неправильные",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v5"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Если clientId < 1, если messageId < 1, или если модель неправильно задана",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v5"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "У клиента нет подписки с AI или все устройства по подписке заняты",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v5"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/AiMessage/DeleteMessagesByTopicID": {
+      "post": {
+        "tags": [
+          "AiMessageController_v6"
+        ],
+        "summary": "Удаляет сообщения в чате",
+        "requestBody": {
+          "description": "Данные для удаления",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Model_Common_Int_v6"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Возвращает идентификатор сообщения клиента",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v5"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Если данные авторизации неправильные",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v5"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Если clientId < 1, если topicId != null && topicId < 1, или если модель неправильно задана",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v5"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "У клиента нет подписки с AI или все устройства по подписке заняты",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Result_v5"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChatMessage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "date_Send": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "topicID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "flag_Assistant": {
+            "type": "boolean"
+          },
+          "flag_IsStimulation": {
+            "type": "boolean"
+          },
+          "flag_Fail": {
+            "type": "boolean"
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "fileId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "fileType": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "randomFact": {
+            "$ref": "#/components/schemas/RandomFact"
+          },
+          "flag_Reported": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "flag_Liked": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "imageID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "fileDataID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChatMessageListResult_v1": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChatMessageListResult_v6": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Статус: OK/Err",
+            "nullable": true
+          },
+          "code": {
+            "type": "integer",
+            "description": "Код статуса",
+            "format": "int32"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            },
+            "description": "Данные (необязательно)",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "description": "Строка сообщения (необязательно)",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Класс для возврата данных"
+      },
+      "Int32Result_v5": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Статус: OK/Err",
+            "nullable": true
+          },
+          "code": {
+            "type": "integer",
+            "description": "Код статуса",
+            "format": "int32"
+          },
+          "data": {
+            "type": "integer",
+            "description": "Данные (необязательно)",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string",
+            "description": "Строка сообщения (необязательно)",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Класс для возврата данных"
+      },
+      "Int32Result_v6": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Статус: OK/Err",
+            "nullable": true
+          },
+          "code": {
+            "type": "integer",
+            "description": "Код статуса",
+            "format": "int32"
+          },
+          "data": {
+            "type": "integer",
+            "description": "Данные (необязательно)",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string",
+            "description": "Строка сообщения (необязательно)",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Класс для возврата данных"
+      },
+      "Model_AiMessage_StreamMessageFile_v6": {
+        "required": [
+          "fileData",
+          "fileName",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "topicID": {
+            "type": "integer",
+            "description": "Идентификатор топика (если null - то это общий чат)",
+            "format": "int32",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "description": "Промпт генерации текста",
+            "nullable": true
+          },
+          "fileName": {
+            "type": "string",
+            "description": "Имя файла",
+            "nullable": true
+          },
+          "fileData": {
+            "type": "string",
+            "description": "Данные файла в формате Base64",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Модель для файлов"
+      },
+      "Model_AiMessage_StreamMessageImage_v6": {
+        "required": [
+          "imageData",
+          "message",
+          "mimeType"
+        ],
+        "type": "object",
+        "properties": {
+          "topicID": {
+            "type": "integer",
+            "description": "Идентификатор топика (если null - то это общий чат)",
+            "format": "int32",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "description": "Промпт генерации текста",
+            "nullable": true
+          },
+          "mimeType": {
+            "type": "string",
+            "description": "MimeType - \"image/jpeg\", \"image/png\", \"image/gif\", \"image/webp\", \"image/bmp\"",
+            "nullable": true
+          },
+          "imageData": {
+            "type": "string",
+            "description": "Данные изображения в формате Base64",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Модель для файлов"
+      },
+      "Model_AiMessage_StreamMessage_v6": {
+        "required": [
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "topicID": {
+            "type": "integer",
+            "description": "Идентификатор топика (если null - то это общий чат)",
+            "format": "int32",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "description": "Промпт генерации текста",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Модель данных для отправки сообщения в чат"
+      },
+      "Model_AiMessage_v6": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Уникальный идентификатор записи",
+            "format": "int32"
+          },
+          "date_Send": {
+            "type": "string",
+            "description": "Дата отправки",
+            "format": "date-time"
+          },
+          "topicID": {
+            "type": "integer",
+            "description": "Идентификатор темы",
+            "format": "int32",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "description": "Сообщение",
+            "nullable": true
+          },
+          "flag_Assistant": {
+            "type": "boolean",
+            "description": "Флаг того что сообщение было получение от ChatGPT"
+          },
+          "flag_IsStimulation": {
+            "type": "boolean",
+            "description": "Флаг того что это стимулирующее сообщение",
+            "deprecated": true
+          },
+          "flag_Fail": {
+            "type": "boolean",
+            "description": "Флаг того что на сообщение не удалось ответить",
+            "deprecated": true
+          },
+          "fileName": {
+            "type": "string",
+            "description": "Название файла",
+            "nullable": true,
+            "deprecated": true
+          },
+          "fileID": {
+            "type": "integer",
+            "description": "Идентификатор файла",
+            "format": "int32",
+            "nullable": true,
+            "deprecated": true
+          },
+          "flag_Reported": {
+            "type": "boolean",
+            "description": "Флаг того что на сообщение была отправлена жалоба",
+            "nullable": true
+          },
+          "flag_Liked": {
+            "type": "boolean",
+            "description": "Флаг того что сообщение лайкнуто",
+            "nullable": true
+          },
+          "imageID": {
+            "type": "integer",
+            "description": "Код изображения для загрузки",
+            "format": "int32",
+            "nullable": true
+          },
+          "fileDataID": {
+            "type": "integer",
+            "description": "Код файла для загрузки",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Модель для сообщения"
+      },
+      "Model_AiMessage_v6ListResult_v1": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Model_AiMessage_v6"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Model_AiMessage_v6ListResult_v6": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Статус: OK/Err",
+            "nullable": true
+          },
+          "code": {
+            "type": "integer",
+            "description": "Код статуса",
+            "format": "int32"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Model_AiMessage_v6"
+            },
+            "description": "Данные (необязательно)",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "description": "Строка сообщения (необязательно)",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Класс для возврата данных"
+      },
+      "Model_AiMessage_v6Result_v6": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Статус: OK/Err",
+            "nullable": true
+          },
+          "code": {
+            "type": "integer",
+            "description": "Код статуса",
+            "format": "int32"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Model_AiMessage_v6"
+          },
+          "message": {
+            "type": "string",
+            "description": "Строка сообщения (необязательно)",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Класс для возврата данных"
+      },
+      "Model_Common_Int_v6": {
+        "type": "object",
+        "properties": {
+          "data_Int": {
+            "type": "integer",
+            "description": "Данные Int",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Модель данных общая - для одного целочисленного параметра"
+      },
+      "RandomFact": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "factMessage_RU": {
+            "type": "string",
+            "nullable": true
+          },
+          "factMessage_EN": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "StringResult_v6": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Статус: OK/Err",
+            "nullable": true
+          },
+          "code": {
+            "type": "integer",
+            "description": "Код статуса",
+            "format": "int32"
+          },
+          "data": {
+            "type": "string",
+            "description": "Данные (необязательно)",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "description": "Строка сообщения (необязательно)",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Класс для возврата данных"
+      }
+    }
+  }
+}

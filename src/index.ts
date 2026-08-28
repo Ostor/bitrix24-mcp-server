@@ -7,12 +7,48 @@ import { AsyncLocalStorage } from "async_hooks";
 import oauthRouter from "./oauth.js";
 import { bitrix24, PORTAL_URL } from "./bitrix24.js";
 import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import swaggerUi from "swagger-ui-express";
+import basicAuth from "express-basic-auth";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// --- НАСТРОЙКА SWAGGER UI ---
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const swaggerV5Path = fs.existsSync(path.join(__dirname, 'swagger-v5.json'))
+  ? path.join(__dirname, 'swagger-v5.json')
+  : path.join(__dirname, '../src/swagger-v5.json');
+const swaggerV6Path = fs.existsSync(path.join(__dirname, 'swagger-v6.json'))
+  ? path.join(__dirname, 'swagger-v6.json')
+  : path.join(__dirname, '../src/swagger-v6.json');
+
+// --- Basic Auth middleware для Swagger ---
+const swaggerAuth = basicAuth({
+  users: { 'ithelper': 'ithelper2027!' },
+  challenge: true,
+  realm: 'Swagger Documentation'
+});
+
+app.get('/gpt/swagger/v5.json', swaggerAuth, (req, res) => res.sendFile(swaggerV5Path));
+app.get('/gpt/swagger/v6.json', swaggerAuth, (req, res) => res.sendFile(swaggerV6Path));
+
+const swaggerOptions = {
+  explorer: true,
+  swaggerOptions: {
+    urls: [
+      { url: '/gpt/swagger/v6.json', name: 'V6' },
+      { url: '/gpt/swagger/v5.json', name: 'V5' }
+    ]
+  }
+};
+app.use('/gpt/swagger', swaggerAuth, swaggerUi.serve, swaggerUi.setup(undefined, swaggerOptions));
 
 // --- НАСТРОЙКА CORS MIDDLEWARE ---
 app.use((req, res, next) => {
