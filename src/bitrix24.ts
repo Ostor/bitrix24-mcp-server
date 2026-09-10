@@ -711,10 +711,12 @@ export const bitrix24 = {
     if (images && images.length > 0) {
       for (const img of images) {
         try {
+          let pureBase64 = img.base64.replace(/^data:image\/[a-z+-]+;base64,/i, "");
+          pureBase64 = pureBase64.replace(/\s+/g, "");
           const fileRes = await callBitrix24<any>("note.file.add", {
             documentId: newPageId,
             fileName: img.name,
-            fileContent: img.base64
+            fileContent: pureBase64
           }, token);
           
           if (fileRes && fileRes.file && fileRes.file.id) {
@@ -761,10 +763,12 @@ export const bitrix24 = {
     if (processedMarkdown && images && images.length > 0) {
       for (const img of images) {
         try {
+          let pureBase64 = img.base64.replace(/^data:image\/[a-z+-]+;base64,/i, "");
+          pureBase64 = pureBase64.replace(/\s+/g, "");
           const fileRes = await callBitrix24<any>("note.file.add", {
             documentId: Number(pageId),
             fileName: img.name,
-            fileContent: img.base64
+            fileContent: pureBase64
           }, token);
           
           if (fileRes && fileRes.file && fileRes.file.id) {
