@@ -623,6 +623,68 @@ export const bitrix24 = {
     return callBitrix24<any>("note.document.get", { id: Number(pageId) }, token)
       .then(res => res && res.item ? res.item : null);
   },
+  
+  // --- CRM Invoices (Old Module) ---
+  listCrmInvoices: async (token: string, select?: string[], filter?: any, order?: any, start?: number): Promise<any> => {
+    const params: any = {};
+    if (select) params.select = select;
+    if (filter) params.filter = filter;
+    if (order) params.order = order;
+    if (start) params.start = start;
+    return callBitrix24<any>("crm.invoice.list", params, token)
+      .then(res => res && res.result ? res.result : res);
+  },
+  getCrmInvoice: async (token: string, id: number): Promise<any> => {
+    return callBitrix24<any>("crm.invoice.get", { id }, token)
+      .then(res => res && res.result ? res.result : res);
+  },
+  addCrmInvoice: async (token: string, fields: any): Promise<any> => {
+    return callBitrix24<any>("crm.invoice.add", { fields }, token)
+      .then(res => res && res.result ? res.result : res);
+  },
+  updateCrmInvoice: async (token: string, id: number, fields: any): Promise<any> => {
+    return callBitrix24<any>("crm.invoice.update", { id, fields }, token)
+      .then(res => res && res.result ? res.result : res);
+  },
+  deleteCrmInvoice: async (token: string, id: number): Promise<any> => {
+    return callBitrix24<any>("crm.invoice.delete", { id }, token);
+  },
+
+  // --- CRM Smart Processes (Items) ---
+  
+  getCrmItemFields: async (token: string, entityTypeId: number): Promise<any> => {
+    return callBitrix24<any>("crm.item.fields", { entityTypeId }, token)
+      .then(res => res && res.fields ? res.fields : res);
+  },
+  
+  listCrmItems: async (token: string, entityTypeId: number, select?: string[], filter?: any, order?: any, start?: number): Promise<any> => {
+    const params: any = { entityTypeId };
+    if (select) params.select = select;
+    if (filter) params.filter = filter;
+    if (order) params.order = order;
+    if (start) params.start = start;
+    return callBitrix24<any>("crm.item.list", params, token)
+      .then(res => res && res.items ? res.items : res);
+  },
+  
+  getCrmItem: async (token: string, entityTypeId: number, id: number): Promise<any> => {
+    return callBitrix24<any>("crm.item.get", { entityTypeId, id }, token)
+      .then(res => res && res.item ? res.item : res);
+  },
+  
+  addCrmItem: async (token: string, entityTypeId: number, fields: any): Promise<any> => {
+    return callBitrix24<any>("crm.item.add", { entityTypeId, fields }, token)
+      .then(res => res && res.item ? res.item : res);
+  },
+  
+  updateCrmItem: async (token: string, entityTypeId: number, id: number, fields: any): Promise<any> => {
+    return callBitrix24<any>("crm.item.update", { entityTypeId, id, fields }, token)
+      .then(res => res && res.item ? res.item : res);
+  },
+  
+  deleteCrmItem: async (token: string, entityTypeId: number, id: number): Promise<any> => {
+    return callBitrix24<any>("crm.item.delete", { entityTypeId, id }, token);
+  },
 
   addKnowledgeBasePage: async (token: string, kbId: string, title: string, markdown: string, parentId?: string, images?: { name: string, base64: string }[]): Promise<any> => {
     let processedMarkdown = markdown;

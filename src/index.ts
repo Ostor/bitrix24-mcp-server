@@ -454,7 +454,181 @@ function createMcpServer(): McpServer {
     }
   );
 
-  // 20. Создание новой страницы в Базе знаний
+  // 20. CRM Invoices (Old Module)
+  server.tool(
+    "bitrix24_crm_invoice_list",
+    "Получить список старых счетов",
+    {
+      select: z.array(z.string()).optional().describe("Список запрашиваемых полей"),
+      filter: z.record(z.any()).optional().describe("Фильтр для поиска"),
+      order: z.record(z.any()).optional().describe("Сортировка"),
+      start: z.number().optional().describe("Отступ для пагинации")
+    },
+    async ({ select, filter, order, start }) => {
+      const token = getTokenOrThrow();
+      const result = await bitrix24.listCrmInvoices(token, select, filter, order, start);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    }
+  );
+
+  server.tool(
+    "bitrix24_crm_invoice_get",
+    "Получить старый счет по ID",
+    { id: z.number().describe("ID счета") },
+    async ({ id }) => {
+      const token = getTokenOrThrow();
+      const result = await bitrix24.getCrmInvoice(token, id);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    }
+  );
+
+  server.tool(
+    "bitrix24_crm_invoice_add",
+    "Создать старый счет",
+    { fields: z.record(z.any()).describe("Поля счета") },
+    async ({ fields }) => {
+      const token = getTokenOrThrow();
+      const result = await bitrix24.addCrmInvoice(token, fields);
+      return {
+        content: [{ type: "text", text: `Invoice created: ${JSON.stringify(result)}` }]
+      };
+    }
+  );
+
+  server.tool(
+    "bitrix24_crm_invoice_update",
+    "Обновить старый счет",
+    {
+      id: z.number().describe("ID счета"),
+      fields: z.record(z.any()).describe("Поля")
+    },
+    async ({ id, fields }) => {
+      const token = getTokenOrThrow();
+      const result = await bitrix24.updateCrmInvoice(token, id, fields);
+      return {
+        content: [{ type: "text", text: `Invoice updated: ${JSON.stringify(result)}` }]
+      };
+    }
+  );
+
+  server.tool(
+    "bitrix24_crm_invoice_delete",
+    "Удалить старый счет",
+    { id: z.number().describe("ID счета") },
+    async ({ id }) => {
+      const token = getTokenOrThrow();
+      await bitrix24.deleteCrmInvoice(token, id);
+      return {
+        content: [{ type: "text", text: `Invoice deleted` }]
+      };
+    }
+  );
+
+  // 21. CRM Smart Processes (Items)
+  server.tool(
+    "bitrix24_crm_item_fields",
+    "Получить структуру полей для конкретного смарт-процесса (например, для счетов, заявок и т.д.)",
+    {
+      entityTypeId: z.number().describe("ID типа смарт-процесса (например, 31 для счетов)")
+    },
+    async ({ entityTypeId }) => {
+      const token = getTokenOrThrow();
+      const result = await bitrix24.getCrmItemFields(token, entityTypeId);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    }
+  );
+
+  server.tool(
+    "bitrix24_crm_item_list",
+    "Получить список элементов смарт-процесса (счетов, заявок и т.д.)",
+    {
+      entityTypeId: z.number().describe("ID типа смарт-процесса"),
+      select: z.array(z.string()).optional().describe("Список запрашиваемых полей"),
+      filter: z.record(z.any()).optional().describe("Фильтр для поиска"),
+      order: z.record(z.any()).optional().describe("Сортировка"),
+      start: z.number().optional().describe("Отступ для пагинации")
+    },
+    async ({ entityTypeId, select, filter, order, start }) => {
+      const token = getTokenOrThrow();
+      const result = await bitrix24.listCrmItems(token, entityTypeId, select, filter, order, start);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    }
+  );
+
+  server.tool(
+    "bitrix24_crm_item_get",
+    "Получить конкретный элемент смарт-процесса по его ID",
+    {
+      entityTypeId: z.number().describe("ID типа смарт-процесса"),
+      id: z.number().describe("ID элемента")
+    },
+    async ({ entityTypeId, id }) => {
+      const token = getTokenOrThrow();
+      const result = await bitrix24.getCrmItem(token, entityTypeId, id);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    }
+  );
+
+  server.tool(
+    "bitrix24_crm_item_add",
+    "Создать новый элемент смарт-процесса (например, выставить счет)",
+    {
+      entityTypeId: z.number().describe("ID типа смарт-процесса"),
+      fields: z.record(z.any()).describe("Поля нового элемента")
+    },
+    async ({ entityTypeId, fields }) => {
+      const token = getTokenOrThrow();
+      const result = await bitrix24.addCrmItem(token, entityTypeId, fields);
+      return {
+        content: [{ type: "text", text: `Item successfully created in entity ${entityTypeId}. Details: ${JSON.stringify(result)}` }]
+      };
+    }
+  );
+
+  server.tool(
+    "bitrix24_crm_item_update",
+    "Обновить элемент смарт-процесса (например, сменить статус счета)",
+    {
+      entityTypeId: z.number().describe("ID типа смарт-процесса"),
+      id: z.number().describe("ID элемента"),
+      fields: z.record(z.any()).describe("Поля для обновления")
+    },
+    async ({ entityTypeId, id, fields }) => {
+      const token = getTokenOrThrow();
+      const result = await bitrix24.updateCrmItem(token, entityTypeId, id, fields);
+      return {
+        content: [{ type: "text", text: `Item ${id} successfully updated. Details: ${JSON.stringify(result)}` }]
+      };
+    }
+  );
+
+  server.tool(
+    "bitrix24_crm_item_delete",
+    "Удалить элемент смарт-процесса",
+    {
+      entityTypeId: z.number().describe("ID типа смарт-процесса"),
+      id: z.number().describe("ID элемента")
+    },
+    async ({ entityTypeId, id }) => {
+      const token = getTokenOrThrow();
+      await bitrix24.deleteCrmItem(token, entityTypeId, id);
+      return {
+        content: [{ type: "text", text: `Item ${id} successfully deleted.` }]
+      };
+    }
+  );
+
+  // 21. Создание новой страницы в Базе знаний
   server.tool(
     "bitrix24_add_kb_page",
     "Создать новую страницу в Базе знаний 2.0 с Markdown содержимым",
