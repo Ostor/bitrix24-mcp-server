@@ -724,6 +724,8 @@ export const bitrix24 = {
           let uploadedFileId = null;
           if (typeof fileRes === "number" || typeof fileRes === "string") {
             uploadedFileId = fileRes;
+          } else if (fileRes && fileRes.item && fileRes.item.id) {
+            uploadedFileId = fileRes.item.id;
           } else if (fileRes && fileRes.file && fileRes.file.id) {
             uploadedFileId = fileRes.file.id;
           } else if (fileRes && fileRes.id) {
@@ -784,6 +786,8 @@ export const bitrix24 = {
           let uploadedFileId = null;
           if (typeof fileRes === "number" || typeof fileRes === "string") {
             uploadedFileId = fileRes;
+          } else if (fileRes && fileRes.item && fileRes.item.id) {
+            uploadedFileId = fileRes.item.id;
           } else if (fileRes && fileRes.file && fileRes.file.id) {
             uploadedFileId = fileRes.file.id;
           } else if (fileRes && fileRes.id) {
