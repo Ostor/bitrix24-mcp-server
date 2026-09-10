@@ -624,25 +624,85 @@ export const bitrix24 = {
       .then(res => res && res.item ? res.item : null);
   },
 
-  addKnowledgeBasePage: async (token: string, kbId: string, title: string, markdown: string, parentId?: string): Promise<any> => {
+  addKnowledgeBasePage: async (token: string, kbId: string, title: string, markdown: string, parentId?: string, images?: { name: string, base64: string }[]): Promise<any> => {
+    let processedMarkdown = markdown;
+    
+    if (images && images.length > 0) {
+      for (const img of images) {
+        try {
+          const fileRes = await callBitrix24<any>("note.file.add", {
+            fileName: img.name,
+            fileContent: img.base64
+          }, token);
+          
+          if (fileRes && fileRes.id) {
+            const assetStr = `[[image fileId=${fileRes.id}]]`;
+            // Заменяем вхождения в markdown: ![alt](name) или просто name
+            // Простейшая замена:
+            const regex = new RegExp(`!\\[[^\\]]*\\]\\(${img.name}\\)`, "g");
+            if (regex.test(processedMarkdown)) {
+              processedMarkdown = processedMarkdown.replace(regex, assetStr);
+            } else {
+              // Если вдруг просто имя было, заменяем его осторожно, либо просто оставляем
+              processedMarkdown = processedMarkdown.replace(img.name, assetStr);
+            }
+          }
+        } catch (err: any) {
+          console.warn(`[Bitrix24] Failed to upload image ${img.name}:`, err.message);
+        }
+      }
+    }
+    
     const fields: any = {
       collectionId: Number(kbId),
       title: title,
-      markdown: markdown
+      markdown: processedMarkdown
     };
     if (parentId) {
       fields.parentId = Number(parentId);
     }
-    
     return callBitrix24<any>("note.document.add", { fields }, token)
       .then(res => res && res.item ? res.item : res);
   },
-
-  updateKnowledgeBasePage: async (token: string, pageId: string, title?: string, markdown?: string): Promise<any> => {
-    const fields: any = {};
-    if (title !== undefined) fields.title = title;
-    if (markdown !== undefined) fields.markdown = markdown;
+  
+  updateKnowledgeBasePage: async (token: string, pageId: string, title?: string, markdown?: string, images?: { name: string, base64: string }[]): Promise<any> => {
+    let processedMarkdown = markdown;
     
+    if (processedMarkdown && images && images.length > 0) {
+      for (const img of images) {
+        try {
+          const fileRes = await callBitrix24<any>("note.file.add", {
+            fileName: img.name,
+            fileContent: img.base64
+          }, token);
+          
+          if (fileRes && fileRes.file && fileRes.file.id) {
+             // Sometimes it returns { file: { id: "123" } }
+            const assetStr = `[[image fileId=${fileRes.file.id}]]`;
+            const regex = new RegExp(`!\\[[^\\]]*\\]\\(${img.name.replace(/\\/g, '\\\\').replace(/\./g, '\\.')}\\)`, "g");
+            if (regex.test(processedMarkdown)) {
+              processedMarkdown = processedMarkdown.replace(regex, assetStr);
+            } else {
+              processedMarkdown = processedMarkdown.replace(img.name, assetStr);
+            }
+          } else if (fileRes && fileRes.id) {
+             const assetStr = `[[image fileId=${fileRes.id}]]`;
+             const regex = new RegExp(`!\\[[^\\]]*\\]\\(${img.name.replace(/\\/g, '\\\\').replace(/\./g, '\\.')}\\)`, "g");
+             if (regex.test(processedMarkdown)) {
+               processedMarkdown = processedMarkdown.replace(regex, assetStr);
+             } else {
+               processedMarkdown = processedMarkdown.replace(img.name, assetStr);
+             }
+          }
+        } catch (err: any) {
+          console.warn(`[Bitrix24] Failed to upload image ${img.name}:`, err.message);
+        }
+      }
+    }
+
+    const fields: any = {};
+    if (title) fields.title = title;
+    if (processedMarkdown) fields.markdown = processedMarkdown;
     return callBitrix24<any>("note.document.update", { 
       id: Number(pageId), 
       fields 

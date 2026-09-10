@@ -462,11 +462,15 @@ function createMcpServer(): McpServer {
       kbId: z.string().describe("ID Базы знаний (collectionId)"),
       title: z.string().describe("Заголовок новой страницы"),
       markdown: z.string().describe("Содержимое страницы в формате Markdown"),
-      parentId: z.string().optional().describe("ID родительской страницы (если нужно создать подстраницу)")
+      parentId: z.string().optional().describe("ID родительской страницы (если нужно создать подстраницу)"),
+      images: z.array(z.object({
+        name: z.string().describe("Имя файла или путь, как он указан в markdown (например, image.png)"),
+        base64: z.string().describe("Base64 строка содержимого картинки")
+      })).optional().describe("Массив картинок для загрузки. MCP сервер сам загрузит их в Битрикс24 и заменит пути в markdown.")
     },
-    async ({ kbId, title, markdown, parentId }) => {
+    async ({ kbId, title, markdown, parentId, images }) => {
       const token = getTokenOrThrow();
-      const result = await bitrix24.addKnowledgeBasePage(token, kbId, title, markdown, parentId);
+      const result = await bitrix24.addKnowledgeBasePage(token, kbId, title, markdown, parentId, images);
       return {
         content: [{ type: "text", text: `Page successfully created in Knowledge Base ${kbId}. Details: ${JSON.stringify(result)}` }]
       };
@@ -480,11 +484,15 @@ function createMcpServer(): McpServer {
     {
       pageId: z.string().describe("ID страницы (id)"),
       title: z.string().optional().describe("Новый заголовок страницы"),
-      markdown: z.string().optional().describe("Новое содержимое страницы в формате Markdown (полностью перезапишет старое)")
+      markdown: z.string().optional().describe("Новое содержимое страницы в формате Markdown (полностью перезапишет старое)"),
+      images: z.array(z.object({
+        name: z.string().describe("Имя файла или путь, как он указан в markdown (например, image.png)"),
+        base64: z.string().describe("Base64 строка содержимого картинки")
+      })).optional().describe("Массив картинок для загрузки. MCP сервер сам загрузит их в Битрикс24 и заменит пути в markdown.")
     },
-    async ({ pageId, title, markdown }) => {
+    async ({ pageId, title, markdown, images }) => {
       const token = getTokenOrThrow();
-      const result = await bitrix24.updateKnowledgeBasePage(token, pageId, title, markdown);
+      const result = await bitrix24.updateKnowledgeBasePage(token, pageId, title, markdown, images);
       return {
         content: [{ type: "text", text: `Page ${pageId} successfully updated. Details: ${JSON.stringify(result)}` }]
       };
