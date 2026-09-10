@@ -687,59 +687,37 @@ export const bitrix24 = {
   },
 
   addKnowledgeBasePage: async (token: string, kbId: string, title: string, markdown: string, parentId?: string, images?: { name: string, base64: string }[]): Promise<any> => {
-    let processedMarkdown = markdown;
-    
-    if (images && images.length > 0) {
-      for (const img of images) {
-        try {
-          const fileRes = await callBitrix24<any>("note.file.add", {
-            fileName: img.name,
-            fileContent: img.base64
-          }, token);
-          
-          if (fileRes && fileRes.id) {
-            const assetStr = `[[image fileId=${fileRes.id}]]`;
-            // Заменяем вхождения в markdown: ![alt](name) или просто name
-            // Простейшая замена:
-            const regex = new RegExp(`!\\[[^\\]]*\\]\\(${img.name}\\)`, "g");
-            if (regex.test(processedMarkdown)) {
-              processedMarkdown = processedMarkdown.replace(regex, assetStr);
-            } else {
-              // Если вдруг просто имя было, заменяем его осторожно, либо просто оставляем
-              processedMarkdown = processedMarkdown.replace(img.name, assetStr);
-            }
-          }
-        } catch (err: any) {
-          console.warn(`[Bitrix24] Failed to upload image ${img.name}:`, err.message);
-        }
-      }
-    }
-    
+    // 1. Создаем страницу сначала, чтобы получить documentId
     const fields: any = {
       collectionId: Number(kbId),
       title: title,
-      markdown: processedMarkdown
+      markdown: markdown // начальный markdown, пока без загруженных картинок
     };
     if (parentId) {
       fields.parentId = Number(parentId);
     }
-    return callBitrix24<any>("note.document.add", { fields }, token)
+    const createRes = await callBitrix24<any>("note.document.add", { fields }, token)
       .then(res => res && res.item ? res.item : res);
-  },
-  
-  updateKnowledgeBasePage: async (token: string, pageId: string, title?: string, markdown?: string, images?: { name: string, base64: string }[]): Promise<any> => {
-    let processedMarkdown = markdown;
+      
+    if (!createRes || !createRes.id) {
+      return createRes;
+    }
     
-    if (processedMarkdown && images && images.length > 0) {
+    const newPageId = createRes.id;
+    let processedMarkdown = markdown;
+    let needsUpdate = false;
+
+    // 2. Если есть картинки, загружаем их, используя полученный documentId
+    if (images && images.length > 0) {
       for (const img of images) {
         try {
           const fileRes = await callBitrix24<any>("note.file.add", {
+            documentId: newPageId,
             fileName: img.name,
             fileContent: img.base64
           }, token);
           
           if (fileRes && fileRes.file && fileRes.file.id) {
-             // Sometimes it returns { file: { id: "123" } }
             const assetStr = `[[image fileId=${fileRes.file.id}]]`;
             const regex = new RegExp(`!\\[[^\\]]*\\]\\(${img.name.replace(/\\/g, '\\\\').replace(/\./g, '\\.')}\\)`, "g");
             if (regex.test(processedMarkdown)) {
@@ -747,6 +725,57 @@ export const bitrix24 = {
             } else {
               processedMarkdown = processedMarkdown.replace(img.name, assetStr);
             }
+            needsUpdate = true;
+          } else if (fileRes && fileRes.id) {
+            const assetStr = `[[image fileId=${fileRes.id}]]`;
+            const regex = new RegExp(`!\\[[^\\]]*\\]\\(${img.name.replace(/\\/g, '\\\\').replace(/\./g, '\\.')}\\)`, "g");
+            if (regex.test(processedMarkdown)) {
+              processedMarkdown = processedMarkdown.replace(regex, assetStr);
+            } else {
+              processedMarkdown = processedMarkdown.replace(img.name, assetStr);
+            }
+            needsUpdate = true;
+          }
+        } catch (err: any) {
+          console.warn(`[Bitrix24] Failed to upload image ${img.name}:`, err.message);
+        }
+      }
+    }
+    
+    // 3. Если мы успешно загрузили картинки и изменили markdown, обновляем страницу
+    if (needsUpdate) {
+      await callBitrix24<any>("note.document.update", { 
+        id: newPageId, 
+        fields: { markdown: processedMarkdown } 
+      }, token);
+    }
+    
+    return createRes;
+  },
+  
+  updateKnowledgeBasePage: async (token: string, pageId: string, title?: string, markdown?: string, images?: { name: string, base64: string }[]): Promise<any> => {
+    let processedMarkdown = markdown;
+    let needsUpdate = false;
+    
+    // Если передан markdown и картинки
+    if (processedMarkdown && images && images.length > 0) {
+      for (const img of images) {
+        try {
+          const fileRes = await callBitrix24<any>("note.file.add", {
+            documentId: Number(pageId),
+            fileName: img.name,
+            fileContent: img.base64
+          }, token);
+          
+          if (fileRes && fileRes.file && fileRes.file.id) {
+            const assetStr = `[[image fileId=${fileRes.file.id}]]`;
+            const regex = new RegExp(`!\\[[^\\]]*\\]\\(${img.name.replace(/\\/g, '\\\\').replace(/\./g, '\\.')}\\)`, "g");
+            if (regex.test(processedMarkdown)) {
+              processedMarkdown = processedMarkdown.replace(regex, assetStr);
+            } else {
+              processedMarkdown = processedMarkdown.replace(img.name, assetStr);
+            }
+            needsUpdate = true;
           } else if (fileRes && fileRes.id) {
              const assetStr = `[[image fileId=${fileRes.id}]]`;
              const regex = new RegExp(`!\\[[^\\]]*\\]\\(${img.name.replace(/\\/g, '\\\\').replace(/\./g, '\\.')}\\)`, "g");
@@ -755,6 +784,7 @@ export const bitrix24 = {
              } else {
                processedMarkdown = processedMarkdown.replace(img.name, assetStr);
              }
+             needsUpdate = true;
           }
         } catch (err: any) {
           console.warn(`[Bitrix24] Failed to upload image ${img.name}:`, err.message);
@@ -764,7 +794,13 @@ export const bitrix24 = {
 
     const fields: any = {};
     if (title) fields.title = title;
+    // Обновляем markdown, если он был передан (даже если картинки не загрузились)
     if (processedMarkdown) fields.markdown = processedMarkdown;
+    
+    if (Object.keys(fields).length === 0) {
+      return { id: pageId, status: "No fields to update" };
+    }
+
     return callBitrix24<any>("note.document.update", { 
       id: Number(pageId), 
       fields 
