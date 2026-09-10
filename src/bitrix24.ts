@@ -719,24 +719,32 @@ export const bitrix24 = {
             fileContent: pureBase64
           }, token);
           
-          if (fileRes && fileRes.file && fileRes.file.id) {
-            const assetStr = `[[image fileId=${fileRes.file.id}]]`;
-            const regex = new RegExp(`!\\[[^\\]]*\\]\\(${img.name.replace(/\\/g, '\\\\').replace(/\./g, '\\.')}\\)`, "g");
-            if (regex.test(processedMarkdown)) {
-              processedMarkdown = processedMarkdown.replace(regex, assetStr);
-            } else {
-              processedMarkdown = processedMarkdown.replace(img.name, assetStr);
-            }
-            needsUpdate = true;
+          console.log(`[Bitrix24] note.file.add SUCCESS for ${img.name}:`, JSON.stringify(fileRes));
+          
+          let uploadedFileId = null;
+          if (typeof fileRes === "number" || typeof fileRes === "string") {
+            uploadedFileId = fileRes;
+          } else if (fileRes && fileRes.file && fileRes.file.id) {
+            uploadedFileId = fileRes.file.id;
           } else if (fileRes && fileRes.id) {
-            const assetStr = `[[image fileId=${fileRes.id}]]`;
+            uploadedFileId = fileRes.id;
+          } else if (fileRes && fileRes.fileId) {
+            uploadedFileId = fileRes.fileId;
+          }
+          
+          if (uploadedFileId) {
+            const assetStr = `[[image fileId=${uploadedFileId}]]`;
             const regex = new RegExp(`!\\[[^\\]]*\\]\\(${img.name.replace(/\\/g, '\\\\').replace(/\./g, '\\.')}\\)`, "g");
-            if (regex.test(processedMarkdown)) {
-              processedMarkdown = processedMarkdown.replace(regex, assetStr);
+            const text = processedMarkdown as string;
+            const replaced = text.replace(regex, assetStr);
+            if (replaced !== text) {
+              processedMarkdown = replaced;
             } else {
-              processedMarkdown = processedMarkdown.replace(img.name, assetStr);
+              processedMarkdown = text.replace(img.name, assetStr);
             }
             needsUpdate = true;
+          } else {
+             console.warn(`[Bitrix24] Could not extract fileId from fileRes for ${img.name}`);
           }
         } catch (err: any) {
           console.warn(`[Bitrix24] Failed to upload image ${img.name}:`, err.message);
@@ -771,24 +779,32 @@ export const bitrix24 = {
             fileContent: pureBase64
           }, token);
           
-          if (fileRes && fileRes.file && fileRes.file.id) {
-            const assetStr = `[[image fileId=${fileRes.file.id}]]`;
+          console.log(`[Bitrix24] note.file.add SUCCESS for ${img.name}:`, JSON.stringify(fileRes));
+          
+          let uploadedFileId = null;
+          if (typeof fileRes === "number" || typeof fileRes === "string") {
+            uploadedFileId = fileRes;
+          } else if (fileRes && fileRes.file && fileRes.file.id) {
+            uploadedFileId = fileRes.file.id;
+          } else if (fileRes && fileRes.id) {
+            uploadedFileId = fileRes.id;
+          } else if (fileRes && fileRes.fileId) {
+            uploadedFileId = fileRes.fileId;
+          }
+          
+          if (uploadedFileId) {
+            const assetStr = `[[image fileId=${uploadedFileId}]]`;
             const regex = new RegExp(`!\\[[^\\]]*\\]\\(${img.name.replace(/\\/g, '\\\\').replace(/\./g, '\\.')}\\)`, "g");
-            if (regex.test(processedMarkdown)) {
-              processedMarkdown = processedMarkdown.replace(regex, assetStr);
+            const text = processedMarkdown as string;
+            const replaced = text.replace(regex, assetStr);
+            if (replaced !== text) {
+              processedMarkdown = replaced;
             } else {
-              processedMarkdown = processedMarkdown.replace(img.name, assetStr);
+              processedMarkdown = text.replace(img.name, assetStr);
             }
             needsUpdate = true;
-          } else if (fileRes && fileRes.id) {
-             const assetStr = `[[image fileId=${fileRes.id}]]`;
-             const regex = new RegExp(`!\\[[^\\]]*\\]\\(${img.name.replace(/\\/g, '\\\\').replace(/\./g, '\\.')}\\)`, "g");
-             if (regex.test(processedMarkdown)) {
-               processedMarkdown = processedMarkdown.replace(regex, assetStr);
-             } else {
-               processedMarkdown = processedMarkdown.replace(img.name, assetStr);
-             }
-             needsUpdate = true;
+          } else {
+             console.warn(`[Bitrix24] Could not extract fileId from fileRes for ${img.name}`);
           }
         } catch (err: any) {
           console.warn(`[Bitrix24] Failed to upload image ${img.name}:`, err.message);
