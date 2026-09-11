@@ -22,7 +22,11 @@ app.use(express.urlencoded({ extended: true }));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use(express.static(path.join(__dirname, 'public')));
+
+const publicPath = fs.existsSync(path.join(__dirname, 'public'))
+  ? path.join(__dirname, 'public')
+  : path.join(__dirname, '../src/public');
+app.use(express.static(publicPath));
 
 const upload = multer({ storage: multer.memoryStorage() });
 
