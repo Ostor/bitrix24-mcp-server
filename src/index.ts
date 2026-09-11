@@ -49,11 +49,19 @@ app.post('/api/import-kb', upload.array('files'), async (req: any, res: any) => 
 
     let result;
     if (mode === 'create') {
-      const kbId = req.body.kbId;
+      let kbId = String(req.body.kbId);
+      const kbMatch = kbId.match(/workspace\/(\d+)/) || kbId.match(/collection\/(\d+)/);
+      if (kbMatch) kbId = kbMatch[1];
+      else kbId = kbId.replace(/\D/g, '');
+
       const title = req.body.title || mdFile.originalname.replace('.md', '');
       result = await bitrix24.addKnowledgeBasePage(token, kbId, title, markdown, undefined, images);
     } else {
-      const pageId = req.body.pageId;
+      let pageId = String(req.body.pageId);
+      const pMatch = pageId.match(/page\/(\d+)/) || pageId.match(/document\/(\d+)/);
+      if (pMatch) pageId = pMatch[1];
+      else pageId = pageId.replace(/\D/g, '');
+
       result = await bitrix24.updateKnowledgeBasePage(token, pageId, undefined, markdown, images);
     }
 
