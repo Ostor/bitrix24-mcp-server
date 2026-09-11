@@ -736,13 +736,19 @@ export const bitrix24 = {
           
           if (uploadedFileId) {
             const assetStr = `[[image fileId=${uploadedFileId}]]`;
-            const regex = new RegExp(`!\\[[^\\]]*\\]\\(${img.name.replace(/\\/g, '\\\\').replace(/\./g, '\\.')}\\)`, "g");
+            
+            // Properly escape the filename for regex
+            const escapedName = img.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // Match ![alt](...path...filename...)
+            const regex = new RegExp(`!\\[[^\\]]*\\]\\([^)]*?${escapedName}[^)]*?\\)`, "gi");
+            
             const text = processedMarkdown as string;
             const replaced = text.replace(regex, assetStr);
             if (replaced !== text) {
               processedMarkdown = replaced;
             } else {
-              processedMarkdown = text.replace(img.name, assetStr);
+              // Fallback: just replace the filename if it wasn't in a standard markdown image tag
+              processedMarkdown = text.split(img.name).join(assetStr);
             }
             needsUpdate = true;
           } else {
@@ -798,13 +804,18 @@ export const bitrix24 = {
           
           if (uploadedFileId) {
             const assetStr = `[[image fileId=${uploadedFileId}]]`;
-            const regex = new RegExp(`!\\[[^\\]]*\\]\\(${img.name.replace(/\\/g, '\\\\').replace(/\./g, '\\.')}\\)`, "g");
+            
+            // Properly escape the filename for regex
+            const escapedName = img.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // Match ![alt](...path...filename...)
+            const regex = new RegExp(`!\\[[^\\]]*\\]\\([^)]*?${escapedName}[^)]*?\\)`, "gi");
+            
             const text = processedMarkdown as string;
             const replaced = text.replace(regex, assetStr);
             if (replaced !== text) {
               processedMarkdown = replaced;
             } else {
-              processedMarkdown = text.replace(img.name, assetStr);
+              processedMarkdown = text.split(img.name).join(assetStr);
             }
             needsUpdate = true;
           } else {
