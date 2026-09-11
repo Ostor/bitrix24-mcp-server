@@ -101,6 +101,14 @@
             
             const formData = new FormData();
             formData.append('mode', currentMode);
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const uploadId = urlParams.get('upload_id');
+            if (uploadId) {
+                formData.append('upload_id', uploadId);
+            } else {
+                return alert('Отсутствует upload_id в ссылке. Пожалуйста, попросите ассистента сгенерировать новую ссылку для загрузки.');
+            }
             if (currentMode === 'update') {
                 const pid = document.getElementById('pageId').value;
                 if (!pid) return alert('Укажите ID страницы');

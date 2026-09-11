@@ -8,6 +8,7 @@ import oauthRouter from "./oauth.js";
 import { bitrix24, PORTAL_URL } from "./bitrix24.js";
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 import { fileURLToPath } from "url";
 import swaggerUi from "swagger-ui-express";
 import basicAuth from "express-basic-auth";
@@ -30,9 +31,19 @@ app.use(express.static(publicPath));
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+const uploadTokens = new Map<string, { token: string, expires: number }>();
+
 app.post('/api/import-kb', upload.array('files'), async (req: any, res: any) => {
   try {
-    const token = getTokenOrThrow(); // Get token from internal logic
+    const uploadId = req.body.upload_id;
+    if (!uploadId) return res.status(401).json({ error: "Missing upload_id. Please request a new upload link from the assistant." });
+    
+    const session = uploadTokens.get(uploadId);
+    if (!session || Date.now() > session.expires) {
+      return res.status(401).json({ error: "Upload link expired or invalid. Please ask the assistant to generate a new one." });
+    }
+    const token = session.token;
+
     const files = req.files as Express.Multer.File[];
     const mode = req.body.mode;
     
@@ -534,6 +545,23 @@ function createMcpServer(): McpServer {
       
       return {
         content: [{ type: "text", text: results.length > 0 ? JSON.stringify(results, null, 2) : "Ничего не найдено по данному запросу." }]
+      };
+    }
+  );
+
+  // 19.6 Генерация ссылки для веб-интерфейса массовой загрузки
+  server.tool(
+    "bitrix24_get_upload_link",
+    "Сгенерировать магическую ссылку на веб-интерфейс, через которую пользователь сможет сам загрузить .md файл и картинки. Используй это, когда пользователь хочет обновить страницу с картинками.",
+    {},
+    async () => {
+      const token = getTokenOrThrow();
+      const uploadId = crypto.randomUUID();
+      // Храним токен 1 час (3600000 мс)
+      uploadTokens.set(uploadId, { token, expires: Date.now() + 3600000 });
+      const link = `https://mcp.ai-helperbot.online/index.html?upload_id=${uploadId}`;
+      return {
+        content: [{ type: "text", text: `Отправьте пользователю эту ссылку для загрузки файлов (она активна 1 час):\n\n${link}` }]
       };
     }
   );
