@@ -12,15 +12,52 @@ import { fileURLToPath } from "url";
 import swaggerUi from "swagger-ui-express";
 import basicAuth from "express-basic-auth";
 
+import multer from "multer";
+
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// --- НАСТРОЙКА SWAGGER UI ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+app.use(express.static(path.join(__dirname, 'public')));
+
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post('/api/import-kb', upload.array('files'), async (req: any, res: any) => {
+  try {
+    const token = getTokenOrThrow(); // Get token from internal logic
+    const files = req.files as Express.Multer.File[];
+    const mode = req.body.mode;
+    
+    let mdFile = files.find(f => f.originalname.endsWith('.md'));
+    if (!mdFile) return res.status(400).json({ error: "No markdown file provided" });
+    
+    let markdown = mdFile.buffer.toString('utf8');
+    const images = files.filter(f => !f.originalname.endsWith('.md')).map(img => {
+      return {
+        name: img.originalname,
+        base64: img.buffer.toString('base64')
+      };
+    });
+
+    let result;
+    if (mode === 'create') {
+      const kbId = req.body.kbId;
+      const title = req.body.title || mdFile.originalname.replace('.md', '');
+      result = await bitrix24.addKnowledgeBasePage(token, kbId, title, markdown, undefined, images);
+    } else {
+      const pageId = req.body.pageId;
+      result = await bitrix24.updateKnowledgeBasePage(token, pageId, undefined, markdown, images);
+    }
+
+    res.json({ success: true, result });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || String(error) });
+  }
+});
 
 const swaggerV5Path = fs.existsSync(path.join(__dirname, 'swagger-v5.json'))
   ? path.join(__dirname, 'swagger-v5.json')
@@ -450,6 +487,41 @@ function createMcpServer(): McpServer {
       const result = await bitrix24.getKnowledgeBasePage(token, pageId);
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+      };
+    }
+  );
+
+  // 19.5 Поиск страниц по всем Базам Знаний (аналог старого kb2_search_documents)
+  server.tool(
+    "bitrix24_search_kb_pages",
+    "Найти страницы в Базах Знаний (KB 2.0) по ключевому слову в заголовке",
+    {
+      query: z.string().describe("Ключевое слово для поиска в заголовках страниц")
+    },
+    async ({ query }) => {
+      const token = getTokenOrThrow();
+      const kbs = await bitrix24.listKnowledgeBases(token);
+      let results = [];
+      const lowerQuery = query.toLowerCase();
+      
+      for (const kb of kbs) {
+        if (!kb.id) continue;
+        const pages = await bitrix24.listKnowledgeBasePages(token, kb.id);
+        for (const page of pages) {
+          if (page.title && page.title.toLowerCase().includes(lowerQuery)) {
+            results.push({
+              kbId: kb.id,
+              kbName: kb.title,
+              pageId: page.id,
+              pageTitle: page.title,
+              parentId: page.parentId
+            });
+          }
+        }
+      }
+      
+      return {
+        content: [{ type: "text", text: results.length > 0 ? JSON.stringify(results, null, 2) : "Ничего не найдено по данному запросу." }]
       };
     }
   );

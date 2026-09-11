@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Загрузка Базы Знаний (Bitrix24)</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 40px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1 { margin-top: 0; font-size: 24px; }
+        .drop-zone { border: 2px dashed #007bff; border-radius: 8px; padding: 40px; text-align: center; color: #007bff; cursor: pointer; transition: background 0.3s; margin-bottom: 20px; }
+        .drop-zone.dragover { background: #e9f5ff; }
+        .files-list { margin-bottom: 20px; font-size: 14px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: #007bff; color: #fff; border: none; padding: 12px 20px; font-size: 16px; border-radius: 4px; cursor: pointer; width: 100%; transition: background 0.3s; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #log { margin-top: 20px; padding: 15px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; white-space: pre-wrap; font-size: 12px; height: 200px; overflow-y: auto; }
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #ddd; }
+        .tab { padding: 10px 20px; cursor: pointer; border: 1px solid transparent; margin-bottom: -1px; }
+        .tab.active { background: #fff; border: 1px solid #ddd; border-bottom-color: #fff; border-radius: 4px 4px 0 0; font-weight: bold; color: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Импорт Markdown в Битрикс24</h1>
+        <p>Загрузите ваш <code>.md</code> файл и все связанные картинки.</p>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="setMode('update')">Обновить существующую страницу</div>
+            <div class="tab" onclick="setMode('create')">Создать новую страницу</div>
+        </div>
+
+        <div id="mode-update" class="form-group">
+            <label>ID страницы (pageId)</label>
+            <input type="text" id="pageId" placeholder="Например: 311 (последняя цифра в ссылке /note/workspace/7/page/311/)">
+        </div>
+
+        <div id="mode-create" class="form-group" style="display: none;">
+            <label>ID Базы знаний (kbId)</label>
+            <input type="text" id="kbId" placeholder="Например: 7 (первая цифра в ссылке /note/workspace/7/...)">
+            <br><br>
+            <label>Заголовок новой страницы</label>
+            <input type="text" id="title" placeholder="Например: Инструкция по настройке">
+        </div>
+
+        <div class="drop-zone" id="dropZone">
+            Перетащите сюда ваш .md файл и все картинки (или кликните для выбора)
+            <input type="file" id="fileInput" multiple style="display: none;">
+        </div>
+        
+        <div class="files-list" id="filesList">Выбрано файлов: 0</div>
+        
+        <button id="uploadBtn">Начать загрузку</button>
+        
+        <div id="log"></div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        let currentMode = 'update';
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const filesList = document.getElementById('filesList');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const logEl = document.getElementById('log');
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('mode-update').style.display = mode === 'update' ? 'block' : 'none';
+            document.getElementById('mode-create').style.display = mode === 'create' ? 'block' : 'none';
+        }
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+        function handleFiles(files) {
+            selectedFiles = Array.from(files);
+            let mdCount = selectedFiles.filter(f => f.name.endsWith('.md')).length;
+            let imgCount = selectedFiles.length - mdCount;
+            filesList.innerHTML = `Выбрано файлов: ${selectedFiles.length} (Markdown: ${mdCount}, Картинок: ${imgCount})`;
+        }
+
+        function log(msg) {
+            logEl.innerHTML += msg + '\\n';
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        uploadBtn.addEventListener('click', async () => {
+            if (selectedFiles.length === 0) return alert('Выберите файлы!');
+            
+            const formData = new FormData();
+            formData.append('mode', currentMode);
+            if (currentMode === 'update') {
+                const pid = document.getElementById('pageId').value;
+                if (!pid) return alert('Укажите ID страницы');
+                formData.append('pageId', pid);
+            } else {
+                const kid = document.getElementById('kbId').value;
+                const title = document.getElementById('title').value;
+                if (!kid || !title) return alert('Укажите ID базы знаний и заголовок');
+                formData.append('kbId', kid);
+                formData.append('title', title);
+            }
+
+            selectedFiles.forEach(file => formData.append('files', file));
+
+            uploadBtn.disabled = true;
+            log('Начинаем обработку и загрузку...');
+
+            try {
+                // Прямой запрос к нашему API
+                const authHeader = 'Bearer ' + localStorage.getItem('bitrix24_token'); // Если нужно
+                const res = await fetch('/api/import-kb', {
+                    method: 'POST',
+                    body: formData,
+                    // Авторизация тут не обязательна, если мы используем серверный токен (что мы и делаем)
+                });
+                const data = await res.json();
+                if (data.error) {
+                    log('ОШИБКА: ' + data.error);
+                } else {
+                    log('УСПЕХ! ' + JSON.stringify(data.result, null, 2));
+                }
+            } catch (err) {
+                log('ОШИБКА СЕТИ: ' + err.message);
+            }
+            uploadBtn.disabled = false;
+        });
+    </script>
+</body>
+</html>
