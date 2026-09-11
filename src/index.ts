@@ -50,10 +50,12 @@ app.post('/api/import-kb', upload.array('files'), async (req: any, res: any) => 
     let mdFile = files.find(f => f.originalname.endsWith('.md'));
     if (!mdFile) return res.status(400).json({ error: "No markdown file provided" });
     
-    let markdown = mdFile.buffer.toString('utf8');
+    let markdown = mdFile.buffer.toString('utf8').normalize('NFC');
     const images = files.filter(f => !f.originalname.endsWith('.md')).map(img => {
+      // Fix multer latin1 filename encoding issue and normalize macOS NFD to standard NFC
+      const correctName = Buffer.from(img.originalname, 'latin1').toString('utf8').normalize('NFC');
       return {
-        name: img.originalname,
+        name: correctName,
         base64: img.buffer.toString('base64')
       };
     });
@@ -65,7 +67,8 @@ app.post('/api/import-kb', upload.array('files'), async (req: any, res: any) => 
       if (kbMatch) kbId = kbMatch[1];
       else kbId = kbId.replace(/\D/g, '');
 
-      const title = req.body.title || mdFile.originalname.replace('.md', '');
+      const correctMdName = Buffer.from(mdFile.originalname, 'latin1').toString('utf8').normalize('NFC');
+      const title = req.body.title || correctMdName.replace('.md', '');
       result = await bitrix24.addKnowledgeBasePage(token, kbId, title, markdown, undefined, images);
     } else {
       let pageId = String(req.body.pageId);
